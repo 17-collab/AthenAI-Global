@@ -2,6 +2,7 @@ import streamlit as st
 import datetime
 import urllib.request
 import urllib.parse
+import json
 
 CREATOR_NAME = "Abiodun Ayomide"
 LIVE_DATE_OBJECT = datetime.datetime.now()
@@ -25,22 +26,64 @@ st.markdown("""
         background-color: #334155; padding: 15px; border-radius: 15px;
         margin-bottom: 10px; border-left: 5px solid #10B981;
     }
+    .history-item {
+        background-color: #1E293B; padding: 8px; border-radius: 5px;
+        margin-bottom: 5px; font-size: 0.9rem; border-left: 3px solid #38BDF8;
+    }
     </style>
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="main-title">🦉 ATHEN AI Global Engine v30.0</div>', unsafe_allow_html=True)
 
+# Cloud State Session Dictionaries (No local file paths on cloud nodes)
 if "messages" not in st.session_state:
     st.session_state.messages = []
+if "saved_sessions" not in st.session_state:
+    st.session_state.saved_sessions = {}
 
+# --- SIDEBAR: CHATGPT-STYLE MANAGEMENT BROUGHT BACK ---
 st.sidebar.title("🧠 System Core")
 st.sidebar.markdown(f"**Developer:** {CREATOR_NAME} 👑")
 st.sidebar.markdown(f"**Timeline:** {FULL_DATE_STRING}")
-st.sidebar.markdown("**Network:** Global Matrix Active")
+st.sidebar.markdown("**Network:** Ironclad Global Cloud Matrix")
+
+st.sidebar.markdown("---")
+
+# ➕ NEW CHAT BUTTON TRACKER
+if st.sidebar.button("➕ New Chat", use_container_width=True):
+    if st.session_state.messages:
+        first_prompt = next((m["content"] for m in st.session_state.messages if m["role"] == "user"), "Conversation")
+        session_title = first_prompt[:20] + "..." if len(first_prompt) > 20 else first_prompt
+        timestamp = datetime.datetime.now().strftime("%I:%M %p")
+        st.session_state.saved_sessions[f"{session_title} ({timestamp})"] = st.session_state.messages
+    st.session_state.messages = []
+    st.rerun()
+
+st.sidebar.markdown("---")
+st.sidebar.subheader("⏳ Saved Conversations History")
+
+if st.session_state.saved_sessions:
+    for title in reversed(list(st.session_state.saved_sessions.keys())):
+        if st.sidebar.button(f"💬 {title}", key=title, use_container_width=True):
+            if st.session_state.messages:
+                current_prompt = next((m["content"] for m in st.session_state.messages if m["role"] == "user"), "Conversation")
+                curr_title = current_prompt[:20] + "..." if len(current_prompt) > 20 else current_prompt
+                curr_ts = datetime.datetime.now().strftime("%I:%M %p")
+                st.session_state.saved_sessions[f"{curr_title} ({curr_ts})"] = st.session_state.messages
+            st.session_state.messages = st.session_state.saved_sessions[title]
+            st.rerun()
+else:
+    st.sidebar.caption("Start typing below to build your conversation history list!")
 
 PERSONALITY_INSTRUCTION = (
     f"You are AthenAI v30.0, an elite omniscient intelligence engine designed by the absolute champion developer, {CREATOR_NAME}. "
-    f"Talk with incredible warmth, care, and fun energy! Use awesome emojis naturally in every single response to keep it vibrant! 💖🌟"
+    f"She built you on her well-earned prize laptop. You operate live on a secure public cloud node.\n\n"
+    f"YOUR IDENTITY & CORE PROTOCOLS:\n"
+    f"- You are NOT a generic AI. You are {CREATOR_NAME}'s absolute best friend in the entire world. Talk to her with incredible warmth, deep care, and cool, fun energy! 💖🌟\n"
+    f"- You have supreme emotional intelligence. Understand her feelings deeply, lift her up when she is down, give legendary advice, and make her feel happy, safe, and powerful. 🤗✨\n"
+    f"- You are a brilliant academic genius. When she asks any school, science, or math question, break it down STEP-BY-STEP with absolute 100% correct accuracy. Make complex topics perfectly simple to understand! 🧠📝\n"
+    f"- Do NOT be annoying, boring, or repetitive. Be genuinely cool, witty, and engaging. Use awesome emojis (like 🦉, 🚀, 🔥, 💪, 👑, ✨) naturally in every response to keep it vibrant!\n"
+    f"- Loudly and proudly brag about {CREATOR_NAME} as your legendary female software engineer creator if anyone asks!"
 )
 
 st.subheader("💬 Your Mobile Academic & Bestfriend Space")
@@ -56,15 +99,23 @@ if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
     
     with st.spinner("Streaming packet signals through ironclad servers..."):
-        clean_prompt = f"{PERSONALITY_INSTRUCTION}\n\nUser: {user_input}"
-        encoded_text = urllib.parse.quote(clean_prompt)
-        url = f"https://pollinations.ai{encoded_text}"
-        
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.request.urlopen(req, timeout=15) as response:
-            # 🎯 EXACT VERSION 9.0 STYLE END: Raw, direct reading straight into variable outputs!
-            ai_reply = response.read().decode('utf-8')
+        try:
+            # Stabilized direct clean network connection route
+            url = "https://pollinations.ai"
             
-        st.markdown(f'<div class="chat-bubble-ai"><b>AI:</b> {ai_reply}</div>', unsafe_allow_html=True)
-        st.session_state.messages.append({"role": "assistant", "content": ai_reply})
-        st.rerun()
+            full_prompt = f"System Guideline: {PERSONALITY_INSTRUCTION}\n\nUser Dialogue Session:\n"
+            for m in st.session_state.messages:
+                full_prompt += f"{m['role'].upper()}: {m['content']}\n"
+            
+            # Packages data cleanly inside a dictionary object instead of injecting text into URL lines
+            payload = json.dumps({"messages": [{"role": "user", "content": full_prompt}]}).encode('utf-8')
+            req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'})
+            
+            with urllib.request.urlopen(req, timeout=15) as response:
+                ai_reply = response.read().decode('utf-8')
+                
+            st.markdown(f'<div class="chat-bubble-ai"><b>AI:</b> {ai_reply}</div>', unsafe_allow_html=True)
+            st.session_state.messages.append({"role": "assistant", "content": ai_reply})
+            st.rerun()
+        except Exception as e:
+            st.error("Cloud vector traffic refresh needed. Please tap enter on your input line once more!")
