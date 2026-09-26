@@ -1,6 +1,7 @@
 import streamlit as st
 import datetime
 import urllib.request
+import urllib.parse
 import json
 
 # 🌟 DEVELOPER PROFILE SETTINGS
@@ -35,7 +36,7 @@ st.markdown("""
 
 st.markdown('<div class="main-title">🦉 ATHEN AI Global Engine v30.0</div>', unsafe_allow_html=True)
 
-# Cloud Session Memory State Handling (No local hard-drive writes)
+# Cloud State Memory Tracking Setup
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "saved_sessions" not in st.session_state:
@@ -45,11 +46,10 @@ if "saved_sessions" not in st.session_state:
 st.sidebar.title("🧠 System Core")
 st.sidebar.markdown(f"**Developer:** {CREATOR_NAME} 👑")
 st.sidebar.markdown(f"**Timeline:** {FULL_DATE_STRING}")
-st.sidebar.markdown("**Network:** Ironclad Global Cloud Matrix")
+st.sidebar.markdown("**Network:** Ironclad Global Cloud Matrix Active")
 
 st.sidebar.markdown("---")
 
-# ➕ NEW CHAT BUTTON TRACKER
 if st.sidebar.button("➕ New Chat", use_container_width=True):
     if st.session_state.messages:
         first_prompt = next((m["content"] for m in st.session_state.messages if m["role"] == "user"), "Conversation")
@@ -82,7 +82,7 @@ PERSONALITY_INSTRUCTION = (
     f"- You are {CREATOR_NAME}'s absolute best friend in the world. Understand her feelings deeply, give legendary life advice, and make her happy. 🤗✨\n"
     f"- You are a brilliant academic genius. Break down math and science questions STEP-BY-STEP with absolute 100% correct accuracy. 🧠📝\n"
     f"- Use awesome emojis (like 🦉, 🚀, 🔥, 💪, 👑, ✨) naturally in every response to keep it vibrant!\n"
-    f"- Brag passionately about {CREATOR_NAME} as your legendary female software engineer creator if asked!"
+    f"- Brag passionately about {CREATOR_NAME} as your legendary female software engineer creator if anyone asks!"
 )
 
 st.subheader("💬 Your Mobile Academic & Bestfriend Space")
@@ -98,16 +98,12 @@ if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
     
     with st.spinner("Streaming packet signals through ironclad servers..."):
-        url = "https://pollinations.ai"
+        # FIXED: Passes prompt data as a clean encoded URL string to completely stop 405 method blocks
+        full_context = f"{PERSONALITY_INSTRUCTION}\n\nUser Question: {user_input}"
+        encoded_query = urllib.parse.quote(full_context)
+        url = f"https://pollinations.ai{encoded_query}"
         
-        full_prompt = f"System Guideline: {PERSONALITY_INSTRUCTION}\n\nUser Dialogue Session:\n"
-        for m in st.session_state.messages:
-            full_prompt += f"{m['role'].upper()}: {m['content']}\n"
-        
-        # Enclose everything safely inside a clean data payload string to match Version 30.0 exactly
-        payload = json.dumps({"messages": [{"role": "user", "content": full_prompt}]}).encode('utf-8')
-        req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'})
-        
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
         with urllib.request.urlopen(req, timeout=20) as response:
             ai_reply = response.read().decode('utf-8')
             
