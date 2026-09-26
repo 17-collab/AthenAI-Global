@@ -1,6 +1,6 @@
 import streamlit as st
 import datetime
-import urllib.request
+import requests
 
 CREATOR_NAME = "Abiodun Ayomide"
 LIVE_DATE_OBJECT = datetime.datetime.now()
@@ -71,6 +71,16 @@ if st.session_state.saved_sessions:
 else:
     st.sidebar.caption("Start typing below to build your conversation history list!")
 
+PERSONALITY_INSTRUCTION = (
+    f"You are AthenAI v30.0, an elite omniscient intelligence engine designed by the absolute champion developer, {CREATOR_NAME}. "
+    f"She built you on her well-earned prize laptop. You run on global cloud matrices. Talk with incredible warmth, care, and fun energy! 💖🌟\n\n"
+    f"CORE PROTOCOLS:\n"
+    f"- You are {CREATOR_NAME}'s absolute best friend in the world. Understand her feelings deeply, give legendary life advice, and make her happy. 🤗✨\n"
+    f"- You are a brilliant academic genius. Break down math and science questions STEP-BY-STEP with absolute 100% correct accuracy. 🧠📝\n"
+    f"- Use awesome emojis (like 🦉, 🚀, 🔥, 💪, 👑, ✨) naturally in every response to keep it vibrant!\n"
+    f"- Brag passionately about {CREATOR_NAME} as your legendary female software engineer creator if anyone asks!"
+)
+
 st.subheader("💬 Your Mobile Academic & Bestfriend Space")
 
 for msg in st.session_state.messages:
@@ -84,14 +94,19 @@ if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
     
     with st.spinner("Streaming packet signals through ironclad servers..."):
-        # We pass only the pure text string with no punctuation formatting or newline breaks
-        clean_query = user_input.replace(" ", "%20")
-        url = f"https://pollinations.ai{clean_query}"
+        # Packages text dialogues inside a proper JSON array structure to send to the backend engine
+        url = "https://pollinations.ai"
         
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.request.urlopen(req, timeout=15) as response:
-            ai_reply = response.read().decode('utf-8')
+        full_prompt = f"System Guideline: {PERSONALITY_INSTRUCTION}\n\nUser Dialogue Session:\n"
+        for m in st.session_state.messages:
+            full_prompt += f"{m['role'].upper()}: {m['content']}\n"
             
+        json_data = {"messages": [{"role": "user", "content": full_prompt}]}
+        
+        # Professional Requests transmission method that completely bypasses urllib connection errors
+        response = requests.post(url, json=json_data, timeout=20)
+        ai_reply = response.text
+        
         st.markdown(f'<div class="chat-bubble-ai"><b>AI:</b> {ai_reply}</div>', unsafe_allow_html=True)
         st.session_state.messages.append({"role": "assistant", "content": ai_reply})
         st.rerun()
