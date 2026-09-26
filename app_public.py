@@ -35,13 +35,12 @@ st.markdown("""
 
 st.markdown('<div class="main-title">🦉 ATHEN AI Global Engine v30.0</div>', unsafe_allow_html=True)
 
-# Cloud State Session Dictionaries (No local file paths on cloud nodes)
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "saved_sessions" not in st.session_state:
     st.session_state.saved_sessions = {}
 
-# --- SIDEBAR: CHATGPT-STYLE MANAGEMENT BROUGHT BACK ---
+# --- SIDEBAR: CHATGPT-STYLE MANAGEMENT ---
 st.sidebar.title("🧠 System Core")
 st.sidebar.markdown(f"**Developer:** {CREATOR_NAME} 👑")
 st.sidebar.markdown(f"**Timeline:** {FULL_DATE_STRING}")
@@ -49,7 +48,6 @@ st.sidebar.markdown("**Network:** Ironclad Global Cloud Matrix")
 
 st.sidebar.markdown("---")
 
-# ➕ NEW CHAT BUTTON TRACKER
 if st.sidebar.button("➕ New Chat", use_container_width=True):
     if st.session_state.messages:
         first_prompt = next((m["content"] for m in st.session_state.messages if m["role"] == "user"), "Conversation")
@@ -99,23 +97,19 @@ if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
     
     with st.spinner("Streaming packet signals through ironclad servers..."):
-        try:
-            # Stabilized direct clean network connection route
-            url = "https://pollinations.ai"
+        url = "https://pollinations.ai"
+        
+        full_prompt = f"System Guideline: {PERSONALITY_INSTRUCTION}\n\nUser Dialogue Session:\n"
+        for m in st.session_state.messages:
+            full_prompt += f"{m['role'].upper()}: {m['content']}\n"
+        
+        payload = json.dumps({"messages": [{"role": "user", "content": full_prompt}]}).encode('utf-8')
+        req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'})
+        
+        with urllib.request.urlopen(req, timeout=15) as response:
+            # 🎯 EXACT VERSION 9.0 STYLE END: Straight execution directly into variables with zero trailing blocks!
+            ai_reply = response.read().decode('utf-8')
             
-            full_prompt = f"System Guideline: {PERSONALITY_INSTRUCTION}\n\nUser Dialogue Session:\n"
-            for m in st.session_state.messages:
-                full_prompt += f"{m['role'].upper()}: {m['content']}\n"
-            
-            # Packages data cleanly inside a dictionary object instead of injecting text into URL lines
-            payload = json.dumps({"messages": [{"role": "user", "content": full_prompt}]}).encode('utf-8')
-            req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'})
-            
-            with urllib.request.urlopen(req, timeout=15) as response:
-                ai_reply = response.read().decode('utf-8')
-                
-            st.markdown(f'<div class="chat-bubble-ai"><b>AI:</b> {ai_reply}</div>', unsafe_allow_html=True)
-            st.session_state.messages.append({"role": "assistant", "content": ai_reply})
-            st.rerun()
-        except Exception as e:
-            st.error("Cloud vector traffic refresh needed. Please tap enter on your input line once more!")
+        st.markdown(f'<div class="chat-bubble-ai"><b>AI:</b> {ai_reply}</div>', unsafe_allow_html=True)
+        st.session_state.messages.append({"role": "assistant", "content": ai_reply})
+        st.rerun()
