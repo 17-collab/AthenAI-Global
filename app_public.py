@@ -56,17 +56,15 @@ if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
     
     with st.spinner("Streaming packet signals through ironclad servers..."):
-        try:
-            # Ironclad direct network text query stream
-            encoded_prompt = urllib.parse.quote(f"{PERSONALITY_INSTRUCTION}\n\nUser: {user_input}")
-            url = f"https://pollinations.ai{encoded_prompt}"
+        clean_prompt = f"{PERSONALITY_INSTRUCTION}\n\nUser: {user_input}"
+        encoded_text = urllib.parse.quote(clean_prompt)
+        url = f"https://pollinations.ai{encoded_text}"
+        
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=15) as response:
+            # 🎯 EXACT VERSION 9.0 STYLE END: Raw, direct reading straight into variable outputs!
+            ai_reply = response.read().decode('utf-8')
             
-            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-            with urllib.request.urlopen(req, timeout=15) as response:
-                ai_reply = response.read().decode('utf-8')
-                
-            st.markdown(f'<div class="chat-bubble-ai"><b>AI:</b> {ai_reply}</div>', unsafe_allow_html=True)
-            st.session_state.messages.append({"role": "assistant", "content": ai_reply})
-            st.rerun()
-        except Exception:
-            st.error("Cloud vector traffic refresh needed. Please tap enter on your input line once more!")
+        st.markdown(f'<div class="chat-bubble-ai"><b>AI:</b> {ai_reply}</div>', unsafe_allow_html=True)
+        st.session_state.messages.append({"role": "assistant", "content": ai_reply})
+        st.rerun()
