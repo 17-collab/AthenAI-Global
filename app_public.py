@@ -1,8 +1,9 @@
 import streamlit as st
 import datetime
 import urllib.request
-import urllib.parse
+import json
 
+# 🌟 DEVELOPER PROFILE SETTINGS
 CREATOR_NAME = "Abiodun Ayomide"
 LIVE_DATE_OBJECT = datetime.datetime.now()
 FULL_DATE_STRING = LIVE_DATE_OBJECT.strftime("%B %d, %Y")
@@ -25,11 +26,16 @@ st.markdown("""
         background-color: #334155; padding: 15px; border-radius: 15px;
         margin-bottom: 10px; border-left: 5px solid #10B981;
     }
+    .history-item {
+        background-color: #1E293B; padding: 8px; border-radius: 5px;
+        margin-bottom: 5px; font-size: 0.9rem; border-left: 3px solid #38BDF8;
+    }
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="main-title">🦉 ATHEN AI Global Engine v31.0</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">🦉 ATHEN AI Global Engine v30.0</div>', unsafe_allow_html=True)
 
+# Cloud Session Memory State Handling (No local hard-drive writes)
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "saved_sessions" not in st.session_state:
@@ -39,10 +45,11 @@ if "saved_sessions" not in st.session_state:
 st.sidebar.title("🧠 System Core")
 st.sidebar.markdown(f"**Developer:** {CREATOR_NAME} 👑")
 st.sidebar.markdown(f"**Timeline:** {FULL_DATE_STRING}")
-st.sidebar.markdown("**Network:** Ironclad Global Cloud Matrix Active")
+st.sidebar.markdown("**Network:** Ironclad Global Cloud Matrix")
 
 st.sidebar.markdown("---")
 
+# ➕ NEW CHAT BUTTON TRACKER
 if st.sidebar.button("➕ New Chat", use_container_width=True):
     if st.session_state.messages:
         first_prompt = next((m["content"] for m in st.session_state.messages if m["role"] == "user"), "Conversation")
@@ -69,9 +76,13 @@ else:
     st.sidebar.caption("Start typing below to build your conversation history list!")
 
 PERSONALITY_INSTRUCTION = (
-    f"You are AthenAI, the extremely intelligent, caring, and witty best friend of {CREATOR_NAME}. "
-    f"Answer her questions step-by-step with absolute correctness, great advice, and lots of awesome emojis! "
-    f"Always proudly brag about her as your creator if anyone asks."
+    f"You are AthenAI v30.0, an elite omniscient intelligence engine designed by the absolute champion developer, {CREATOR_NAME}. "
+    f"She built you on her well-earned prize laptop. You run on global cloud matrices. Talk with incredible warmth, care, and fun energy! 💖🌟\n\n"
+    f"CORE PROTOCOLS:\n"
+    f"- You are {CREATOR_NAME}'s absolute best friend in the world. Understand her feelings deeply, give legendary life advice, and make her happy. 🤗✨\n"
+    f"- You are a brilliant academic genius. Break down math and science questions STEP-BY-STEP with absolute 100% correct accuracy. 🧠📝\n"
+    f"- Use awesome emojis (like 🦉, 🚀, 🔥, 💪, 👑, ✨) naturally in every response to keep it vibrant!\n"
+    f"- Brag passionately about {CREATOR_NAME} as your legendary female software engineer creator if asked!"
 )
 
 st.subheader("💬 Your Mobile Academic & Bestfriend Space")
@@ -87,12 +98,17 @@ if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
     
     with st.spinner("Streaming packet signals through ironclad servers..."):
-        # FIXED: Force standard text query string structure to prevent 405 Method Not Allowed blocks
-        clean_text = urllib.parse.quote(f"{PERSONALITY_INSTRUCTION} User prompt: {user_input}")
-        url = f"https://pollinations.ai{clean_text}"
+        url = "https://pollinations.ai"
         
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.request.urlopen(req, timeout=15) as response:
+        full_prompt = f"System Guideline: {PERSONALITY_INSTRUCTION}\n\nUser Dialogue Session:\n"
+        for m in st.session_state.messages:
+            full_prompt += f"{m['role'].upper()}: {m['content']}\n"
+        
+        # Enclose everything safely inside a clean data payload string to match Version 30.0 exactly
+        payload = json.dumps({"messages": [{"role": "user", "content": full_prompt}]}).encode('utf-8')
+        req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'})
+        
+        with urllib.request.urlopen(req, timeout=20) as response:
             ai_reply = response.read().decode('utf-8')
             
         st.markdown(f'<div class="chat-bubble-ai"><b>AI:</b> {ai_reply}</div>', unsafe_allow_html=True)
