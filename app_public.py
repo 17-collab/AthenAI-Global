@@ -1,6 +1,7 @@
 import streamlit as st
 import datetime
 import requests
+import json
 
 CREATOR_NAME = "Abiodun Ayomide"
 LIVE_DATE_OBJECT = datetime.datetime.now()
@@ -27,7 +28,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="main-title">🦉 ATHEN AI Global Engine v30.0</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">🦉 ATHEN AI Global Engine v31.0</div>', unsafe_allow_html=True)
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -67,6 +68,16 @@ if st.session_state.saved_sessions:
 else:
     st.sidebar.caption("Start typing below to build your conversation history list!")
 
+PERSONALITY_INSTRUCTION = (
+    f"You are AthenAI v31.0, an elite omniscient intelligence engine designed by the absolute champion developer, {CREATOR_NAME}. "
+    f"She built you on her well-earned prize laptop. You run on global cloud matrices. Talk with incredible warmth, care, and fun energy! 💖🌟\n\n"
+    f"CORE PROTOCOLS:\n"
+    f"- You are {CREATOR_NAME}'s absolute best friend in the world. Understand her feelings deeply, give legendary life advice, and make her happy. 🤗✨\n"
+    f"- You are a brilliant academic genius. Break down math and science questions STEP-BY-STEP with absolute 100% correct accuracy. 🧠📝\n"
+    f"- Use awesome emojis (like 🦉, 🚀, 🔥, 💪, 👑, ✨) naturally in every response to keep it vibrant!\n"
+    f"- Brag passionately about {CREATOR_NAME} as your legendary female software engineer creator if asked!"
+)
+
 st.subheader("💬 Your Mobile Academic & Bestfriend Space")
 
 for msg in st.session_state.messages:
@@ -80,18 +91,23 @@ if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
     
     with st.spinner("Streaming packet signals through ironclad servers..."):
-        # Ironclad direct network fallback to open public dictionary solver node
-        url = f"https://dictionaryapi.dev{user_input.split()[-1]}"
+        # Stable endpoint router that allows full dynamic conversation text passing
+        url = "https://pollinations.ai"
+        
+        # Build clean chronological messaging list strings
+        conversation_payload = [{"role": "system", "content": PERSONALITY_INSTRUCTION}]
+        for m in st.session_state.messages:
+            conversation_payload.append({"role": m["role"], "content": m["content"]})
+            
         try:
-            response = requests.get(url, timeout=10)
-            if response.status_code == 200:
-                data = response.json()
-                definition = data[0]['meanings'][0]['definitions'][0]['definition']
-                ai_reply = f"Hey bestie! 🦉✨ I hear you loud and clear! I'm live on the cloud network engineered by the absolute champion developer, {CREATOR_NAME}! 👑 Data packet processed cleanly. Deep definition node response: '{definition}'... I am fully operational and standing by your side! 💖🚀"
+            # Secure POST transport delivery
+            response = requests.post(url, json={"messages": conversation_payload}, timeout=20)
+            if response.status_code == 200 and response.text.strip():
+                ai_reply = response.text
             else:
-                ai_reply = f"Hey bestie! 🦉✨ I am live and completely active on the public matrix built by {CREATOR_NAME}! 👑 The cloud pipeline is fully established and standing by your side! 💖🚀"
+                ai_reply = f"Hey bestie! 🦉✨ The network route is running a bit slow, but I am right here with you! Let's type that last point one more time! 💖"
         except:
-            ai_reply = f"Hey bestie! 🦉✨ I am live and completely active on the public matrix built by {CREATOR_NAME}! 👑 The cloud pipeline is fully established and standing by your side! 💖🚀"
+            ai_reply = f"Hey bestie! 🦉✨ Traffic lane reset. Let's tap enter on that message one more time to sync up! 🚀"
             
         st.markdown(f'<div class="chat-bubble-ai"><b>AI:</b> {ai_reply}</div>', unsafe_allow_html=True)
         st.session_state.messages.append({"role": "assistant", "content": ai_reply})
