@@ -2,6 +2,7 @@ import streamlit as st
 import datetime
 import urllib.request
 import urllib.parse
+import json
 
 CREATOR_NAME = "Abiodun Ayomide"
 LIVE_DATE_OBJECT = datetime.datetime.now()
@@ -95,13 +96,17 @@ if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
     
     with st.spinner("Streaming packet signals through ironclad servers..."):
-        # Ironclad direct network text link stream format
-        full_context = f"{PERSONALITY_INSTRUCTION}\n\nUser Question: {user_input}"
-        encoded_text = urllib.parse.quote(full_context)
+        # Safe URL encoding route that safely packages the entire prompt structure
+        clean_prompt = f"{PERSONALITY_INSTRUCTION}\n\nUser Dialogue Session:\n"
+        for m in st.session_state.messages:
+            clean_prompt += f"{m['role'].upper()}: {m['content']}\n"
+            
+        encoded_text = urllib.parse.quote(clean_prompt)
         url = f"https://pollinations.ai{encoded_text}"
         
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.request.urlopen(req, timeout=20) as response:
+        with urllib.request.urlopen(req, timeout=15) as response:
+            # 🎯 DIRECT ENDING: Clean reading straight into the response screen, matching v9.0!
             ai_reply = response.read().decode('utf-8')
             
         st.markdown(f'<div class="chat-bubble-ai"><b>AI:</b> {ai_reply}</div>', unsafe_allow_html=True)
