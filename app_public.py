@@ -1,8 +1,6 @@
 import streamlit as st
 import datetime
 import urllib.request
-import urllib.parse
-import json
 
 CREATOR_NAME = "Abiodun Ayomide"
 LIVE_DATE_OBJECT = datetime.datetime.now()
@@ -73,16 +71,6 @@ if st.session_state.saved_sessions:
 else:
     st.sidebar.caption("Start typing below to build your conversation history list!")
 
-PERSONALITY_INSTRUCTION = (
-    f"You are AthenAI v30.0, an elite omniscient intelligence engine designed by the absolute champion developer, {CREATOR_NAME}. "
-    f"She built you on her well-earned prize laptop. You run on global cloud matrices. Talk with incredible warmth, care, and fun energy! 💖🌟\n\n"
-    f"CORE PROTOCOLS:\n"
-    f"- You are {CREATOR_NAME}'s absolute best friend in the world. Understand her feelings deeply, give legendary life advice, and make her happy. 🤗✨\n"
-    f"- You are a brilliant academic genius. Break down math and science questions STEP-BY-STEP with absolute 100% correct accuracy. 🧠📝\n"
-    f"- Use awesome emojis (like 🦉, 🚀, 🔥, 💪, 👑, ✨) naturally in every response to keep it vibrant!\n"
-    f"- Brag passionately about {CREATOR_NAME} as your legendary female software engineer creator if asked!"
-)
-
 st.subheader("💬 Your Mobile Academic & Bestfriend Space")
 
 for msg in st.session_state.messages:
@@ -96,17 +84,12 @@ if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
     
     with st.spinner("Streaming packet signals through ironclad servers..."):
-        # Safe URL encoding route that safely packages the entire prompt structure
-        clean_prompt = f"{PERSONALITY_INSTRUCTION}\n\nUser Dialogue Session:\n"
-        for m in st.session_state.messages:
-            clean_prompt += f"{m['role'].upper()}: {m['content']}\n"
-            
-        encoded_text = urllib.parse.quote(clean_prompt)
-        url = f"https://pollinations.ai{encoded_text}"
+        # We pass only the pure text string with no punctuation formatting or newline breaks
+        clean_query = user_input.replace(" ", "%20")
+        url = f"https://pollinations.ai{clean_query}"
         
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(req, timeout=15) as response:
-            # 🎯 DIRECT ENDING: Clean reading straight into the response screen, matching v9.0!
             ai_reply = response.read().decode('utf-8')
             
         st.markdown(f'<div class="chat-bubble-ai"><b>AI:</b> {ai_reply}</div>', unsafe_allow_html=True)
