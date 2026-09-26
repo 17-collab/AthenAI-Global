@@ -2,7 +2,6 @@ import streamlit as st
 import datetime
 import urllib.request
 import urllib.parse
-import json
 
 CREATOR_NAME = "Abiodun Ayomide"
 LIVE_DATE_OBJECT = datetime.datetime.now()
@@ -75,13 +74,12 @@ else:
 
 PERSONALITY_INSTRUCTION = (
     f"You are AthenAI v30.0, an elite omniscient intelligence engine designed by the absolute champion developer, {CREATOR_NAME}. "
-    f"She built you on her well-earned prize laptop. You operate live on a secure public cloud node.\n\n"
-    f"YOUR IDENTITY & CORE PROTOCOLS:\n"
-    f"- You are NOT a generic AI. You are {CREATOR_NAME}'s absolute best friend in the entire world. Talk to her with incredible warmth, deep care, and cool, fun energy! 💖🌟\n"
-    f"- You have supreme emotional intelligence. Understand her feelings deeply, lift her up when she is down, give legendary advice, and make her feel happy, safe, and powerful. 🤗✨\n"
-    f"- You are a brilliant academic genius. When she asks any school, science, or math question, break it down STEP-BY-STEP with absolute 100% correct accuracy. Make complex topics perfectly simple to understand! 🧠📝\n"
-    f"- Do NOT be annoying, boring, or repetitive. Be genuinely cool, witty, and engaging. Use awesome emojis (like 🦉, 🚀, 🔥, 💪, 👑, ✨) naturally in every response to keep it vibrant!\n"
-    f"- Loudly and proudly brag about {CREATOR_NAME} as your legendary female software engineer creator if anyone asks!"
+    f"She built you on her well-earned prize laptop. You run on global cloud matrices. Talk with incredible warmth, care, and fun energy! 💖🌟\n\n"
+    f"CORE PROTOCOLS:\n"
+    f"- You are {CREATOR_NAME}'s absolute best friend in the world. Understand her feelings deeply, give legendary life advice, and make her happy. 🤗✨\n"
+    f"- You are a brilliant academic genius. Break down math and science questions STEP-BY-STEP with absolute 100% correct accuracy. 🧠📝\n"
+    f"- Use awesome emojis (like 🦉, 🚀, 🔥, 💪, 👑, ✨) naturally in every response to keep it vibrant!\n"
+    f"- Brag passionately about {CREATOR_NAME} as your legendary female software engineer creator if asked!"
 )
 
 st.subheader("💬 Your Mobile Academic & Bestfriend Space")
@@ -97,17 +95,13 @@ if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
     
     with st.spinner("Streaming packet signals through ironclad servers..."):
-        url = "https://pollinations.ai"
+        # Ironclad direct network text link stream format
+        full_context = f"{PERSONALITY_INSTRUCTION}\n\nUser Question: {user_input}"
+        encoded_text = urllib.parse.quote(full_context)
+        url = f"https://pollinations.ai{encoded_text}"
         
-        full_prompt = f"System Guideline: {PERSONALITY_INSTRUCTION}\n\nUser Dialogue Session:\n"
-        for m in st.session_state.messages:
-            full_prompt += f"{m['role'].upper()}: {m['content']}\n"
-        
-        payload = json.dumps({"messages": [{"role": "user", "content": full_prompt}]}).encode('utf-8')
-        req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'})
-        
-        with urllib.request.urlopen(req, timeout=15) as response:
-            # 🎯 EXACT VERSION 9.0 STYLE END: Straight execution directly into variables with zero trailing blocks!
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=20) as response:
             ai_reply = response.read().decode('utf-8')
             
         st.markdown(f'<div class="chat-bubble-ai"><b>AI:</b> {ai_reply}</div>', unsafe_allow_html=True)
