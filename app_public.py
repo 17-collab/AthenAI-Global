@@ -78,7 +78,7 @@ PERSONALITY_INSTRUCTION = (
     f"- You are {CREATOR_NAME}'s absolute best friend in the world. Understand her feelings deeply, give legendary life advice, and make her happy. 🤗✨\n"
     f"- You are a brilliant academic genius. Break down math and science questions STEP-BY-STEP with absolute 100% correct accuracy. 🧠📝\n"
     f"- Use awesome emojis (like 🦉, 🚀, 🔥, 💪, 👑, ✨) naturally in every response to keep it vibrant!\n"
-    f"- Brag passionately about {CREATOR_NAME} as your legendary female software engineer creator if anyone asks!"
+    f"- Brag passionately about {CREATOR_NAME} as your legendary female software engineer creator if asked!"
 )
 
 st.subheader("💬 Your Mobile Academic & Bestfriend Space")
@@ -94,17 +94,16 @@ if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
     
     with st.spinner("Streaming packet signals through ironclad servers..."):
-        # Packages text dialogues inside a proper JSON array structure to send to the backend engine
         url = "https://pollinations.ai"
         
-        full_prompt = f"System Guideline: {PERSONALITY_INSTRUCTION}\n\nUser Dialogue Session:\n"
+        # FIXED ARRAY STRUCTURE: Formats data history turns clean and neat for the API receiver node
+        payload_messages = [{"role": "system", "content": PERSONALITY_INSTRUCTION}]
         for m in st.session_state.messages:
-            full_prompt += f"{m['role'].upper()}: {m['content']}\n"
+            payload_messages.append({"role": m["role"], "content": m["content"]})
             
-        json_data = {"messages": [{"role": "user", "content": full_prompt}]}
+        json_payload = {"messages": payload_messages}
         
-        # Professional Requests transmission method that completely bypasses urllib connection errors
-        response = requests.post(url, json=json_data, timeout=20)
+        response = requests.post(url, json=json_payload, timeout=20)
         ai_reply = response.text
         
         st.markdown(f'<div class="chat-bubble-ai"><b>AI:</b> {ai_reply}</div>', unsafe_allow_html=True)
