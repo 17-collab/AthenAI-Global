@@ -1,7 +1,7 @@
 import streamlit as st
 import datetime
 import urllib.request
-import json
+import urllib.parse
 
 CREATOR_NAME = "Abiodun Ayomide"
 LIVE_DATE_OBJECT = datetime.datetime.now()
@@ -30,7 +30,6 @@ st.markdown("""
 
 st.markdown('<div class="main-title">🦉 ATHEN AI Global Engine v31.0</div>', unsafe_allow_html=True)
 
-# Cloud State Memory Tracking Setup
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "saved_sessions" not in st.session_state:
@@ -70,13 +69,7 @@ else:
     st.sidebar.caption("Start typing below to build your conversation history list!")
 
 PERSONALITY_INSTRUCTION = (
-    f"You are AthenAI v31.0, an elite omniscient intelligence engine designed by the absolute champion developer, {CREATOR_NAME}. "
-    f"She built you on her well-earned prize laptop. You run on global cloud matrices. Talk with incredible warmth, care, and fun energy! 💖🌟\n\n"
-    f"CORE PROTOCOLS:\n"
-    f"- You are {CREATOR_NAME}'s absolute best friend in the world. Understand her feelings deeply, give legendary life advice, and make her happy. 🤗✨\n"
-    f"- You are a brilliant academic genius. Break down math and science questions STEP-BY-STEP with absolute 100% correct accuracy. 🧠📝\n"
-    f"- Use awesome emojis (like 🦉, 🚀, 🔥, 💪, 👑, ✨) naturally in every response to keep it vibrant!\n"
-    f"- Brag passionately about {CREATOR_NAME} as your legendary female software engineer creator if asked!"
+    f"You are AthenAI, the caring, witty best friend of {CREATOR_NAME}. Answer her questions step-by-step with absolute correctness and awesome emojis!"
 )
 
 st.subheader("💬 Your Mobile Academic & Bestfriend Space")
@@ -92,18 +85,12 @@ if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
     
     with st.spinner("Streaming packet signals through ironclad servers..."):
-        # Safe URL encoding route that safely packages the entire prompt structure
-        url = "https://pollinations.ai"
+        # Fixed Route: Simple web query string formatting that never triggers HTTP security errors
+        clean_text = urllib.parse.quote(f"{PERSONALITY_INSTRUCTION} User prompt: {user_input}")
+        url = f"https://pollinations.ai{clean_text}"
         
-        full_prompt = f"System Guideline: {PERSONALITY_INSTRUCTION}\n\nUser Dialogue Session:\n"
-        for m in st.session_state.messages:
-            full_prompt += f"{m['role'].upper()}: {m['content']}\n"
-            
-        payload = json.dumps({"messages": [{"role": "user", "content": full_prompt}]}).encode('utf-8')
-        req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'})
-        
-        with urllib.request.urlopen(req, timeout=30) as response:
-            # DIRECT ENDING: Clean reading straight into variable outputs without trailing exception traps!
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=15) as response:
             ai_reply = response.read().decode('utf-8')
             
         st.markdown(f'<div class="chat-bubble-ai"><b>AI:</b> {ai_reply}</div>', unsafe_allow_html=True)
