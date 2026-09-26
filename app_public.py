@@ -1,11 +1,8 @@
 import streamlit as st
-import g4f
 import datetime
-import asyncio
-import nest_asyncio
-
-# Coordinates fast asynchronous cloud streams smoothly
-nest_asyncio.apply()
+import urllib.request
+import urllib.parse
+import json
 
 CREATOR_NAME = "Abiodun Ayomide"
 LIVE_DATE_OBJECT = datetime.datetime.now()
@@ -34,7 +31,6 @@ st.markdown("""
 
 st.markdown('<div class="main-title">🦉 ATHEN AI Global Engine v30.0</div>', unsafe_allow_html=True)
 
-# Cloud Session Memory Handling (No local hard-drive writes on public deployment links)
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "saved_sessions" not in st.session_state:
@@ -43,11 +39,10 @@ if "saved_sessions" not in st.session_state:
 st.sidebar.title("🧠 System Core")
 st.sidebar.markdown(f"**Developer:** {CREATOR_NAME} 👑")
 st.sidebar.markdown(f"**Timeline:** {FULL_DATE_STRING}")
-st.sidebar.markdown("**Network:** Global Cloud Matrix Active")
+st.sidebar.markdown("**Network:** Ironclad Global Core Matrix Active")
 
 st.sidebar.markdown("---")
 
-# ➕ NEW CHAT BUTTON LAYER
 if st.sidebar.button("➕ New Chat", use_container_width=True):
     if st.session_state.messages:
         first_prompt = next((m["content"] for m in st.session_state.messages if m["role"] == "user"), "Conversation")
@@ -95,20 +90,21 @@ if user_input:
     st.markdown(f'<div class="chat-bubble-user"><b>USER:</b> {user_input}</div>', unsafe_allow_html=True)
     st.session_state.messages.append({"role": "user", "content": user_input})
     
-    with st.spinner("Streaming packet signals through cloud servers..."):
+    with st.spinner("Streaming packet signals through ironclad servers..."):
         try:
-            formatted_contents = [{"role": "system", "content": PERSONALITY_INSTRUCTION}]
+            url = "https://pollinations.ai"
+            full_prompt = f"System Guideline: {PERSONALITY_INSTRUCTION}\n\nUser Dialogue Session:\n"
             for m in st.session_state.messages:
-                formatted_contents.append({"role": m["role"], "content": m["content"]})
+                full_prompt += f"{m['role'].upper()}: {m['content']}\n"
+                
+            payload = json.dumps({"messages": [{"role": "user", "content": full_prompt}]}).encode('utf-8')
+            req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'})
             
-            response = g4f.ChatCompletion.create(
-                model=g4f.models.gpt_4o,
-                messages=formatted_contents,
-            )
-            
-            ai_reply = str(response) if response else "Cloud connection refresh needed. Please re-type your message!"
+            with urllib.request.urlopen(req, timeout=15) as response:
+                ai_reply = response.read().decode('utf-8')
+                
             st.markdown(f'<div class="chat-bubble-ai"><b>AI:</b> {ai_reply}</div>', unsafe_allow_html=True)
             st.session_state.messages.append({"role": "assistant", "content": ai_reply})
             st.rerun()
-        except Exception:
-            st.error("Cloud vector sync hiccup. Tap Enter again to broadcast!")
+        except Exception as e:
+            st.error("Cloud vector traffic refresh needed. Please tap enter on your input line once more!")
