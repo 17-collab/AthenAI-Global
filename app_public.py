@@ -1,8 +1,6 @@
 import streamlit as st
 import datetime
-import urllib.request
-import urllib.parse
-import json
+import requests
 
 # 🌟 DEVELOPER PROFILE SETTINGS
 CREATOR_NAME = "Abiodun Ayomide"
@@ -36,7 +34,7 @@ st.markdown("""
 
 st.markdown('<div class="main-title">🦉 ATHEN AI Global Engine v30.0</div>', unsafe_allow_html=True)
 
-# Cloud State Memory Tracking Setup
+# Cloud State Memory Tracking Setup (No local file paths on public servers)
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "saved_sessions" not in st.session_state:
@@ -50,6 +48,7 @@ st.sidebar.markdown("**Network:** Ironclad Global Cloud Matrix Active")
 
 st.sidebar.markdown("---")
 
+# ➕ NEW CHAT BUTTON WORKSPACE
 if st.sidebar.button("➕ New Chat", use_container_width=True):
     if st.session_state.messages:
         first_prompt = next((m["content"] for m in st.session_state.messages if m["role"] == "user"), "Conversation")
@@ -98,15 +97,17 @@ if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
     
     with st.spinner("Streaming packet signals through ironclad servers..."):
-        # FIXED: Passes prompt data as a clean encoded URL string to completely stop 405 method blocks
-        full_context = f"{PERSONALITY_INSTRUCTION}\n\nUser Question: {user_input}"
-        encoded_query = urllib.parse.quote(full_context)
-        url = f"https://pollinations.ai{encoded_query}"
+        # FIXED: Uses the advanced requests connection model to automatically prevent URL character crashes
+        url = "https://pollinations.ai"
         
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
-        with urllib.request.urlopen(req, timeout=20) as response:
-            ai_reply = response.read().decode('utf-8')
-            
+        full_context = f"{PERSONALITY_INSTRUCTION}\n\nUser Question: {user_input}"
+        
+        # Packaging the message securely inside a clean, safe payload array data stream
+        json_payload = {"messages": [{"role": "user", "content": full_context}]}
+        
+        response = requests.post(url, json=json_payload, timeout=25)
+        ai_reply = response.text
+        
         st.markdown(f'<div class="chat-bubble-ai"><b>AI:</b> {ai_reply}</div>', unsafe_allow_html=True)
         st.session_state.messages.append({"role": "assistant", "content": ai_reply})
         st.rerun()
